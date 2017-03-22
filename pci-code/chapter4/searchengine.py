@@ -156,7 +156,7 @@ class searcher:
         totalscores = dict([(row[0], 0) for row in rows])
 
         # To put the scoring functions
-        weights = []
+        weights = [(1.0, self.frequencyScore(rows))]
 
         for weight,scores in weights:
             for urlid in totalscores:
@@ -173,7 +173,7 @@ class searcher:
     def query(self, q):
         rows, wordids = self.getMatchRows(q)
         scores = self.getScoredList(rows, wordids)
-        rankedScores = sorted([(score, urlid) for (urlid, score) in scores.items()], reverse=1)
+        rankedScores = sorted([(score, urlid) for urlid,score in scores.items()], reverse=1)
         for score,urlid in rankedScores[0:10]:
             print '%f\t%s' % (score, self.getUrlName(urlid))
 
@@ -182,10 +182,13 @@ class searcher:
         maxScore = max(scores.values())
         maxScore = max(maxScore, vsmall)
         if smallIsBetter:
-            return dict([(u, 1 - float(c) / maxScore) for (u.c) in scores])
+            return dict([(u, 1 - float(c) / maxScore) for u,c in scores.items()])
         else:
-            return dict([(u, float(c) / maxScore) for (u.c) in scores])
+            return dict([(u, float(c) / maxScore) for u,c in scores.items()])
     
     def frequencyScore(self, rows):
-
-# test git with ssh        
+        counts = dict([(row[0], 0) for row in rows])
+        for row in rows:
+            counts[row[0]] += 1
+        return self.normalizeScores(counts)
+        
