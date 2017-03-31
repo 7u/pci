@@ -76,13 +76,17 @@ class crawler:
     # first search to the given depth, indexing pages
     # as we go
     def crawl(self,pages,depth=2):
+        print 'depth=%d' %depth
         for i in range(depth):
             newPages=set()
             for page in pages:
                 try:
                     c=urllib2.urlopen(page)
                 except:
-                    print "Could not open %s" % page
+                    try:
+                        print "Could not open %s" % page
+                    except:
+                        print "unknown error"
                     
                 soup=BeautifulSoup(c, 'html.parser')
                 self.addToIndex(page,soup)
@@ -105,16 +109,16 @@ class crawler:
 
     # Create the database tables
     def createIndexTables(self):
-        self.con.execute('create table urllist(url)')
-        self.con.execute('create table wordlist(word)')
-        self.con.execute('create table wordlocation(urlid,wordid,location)')
-        self.con.execute('create table link(fromid,toid)')
-        self.con.execute('create table linkwords(wordid,linkid)')
-        self.con.execute('create index urlidx on urllist(url)')
-        self.con.execute('create index wordidx on wordlist(word)')
-        self.con.execute('create index wordurlidx on wordlocation(wordid)')
-        self.con.execute('create index urltoidx on link(toid)')
-        self.con.execute('create index urlfromidx on link(fromid)')
+        self.con.execute('create table if not exists urllist(url)')
+        self.con.execute('create table if not exists wordlist(word)')
+        self.con.execute('create table if not exists wordlocation(urlid,wordid,location)')
+        self.con.execute('create table if not exists link(fromid,toid)')
+        self.con.execute('create table if not exists linkwords(wordid,linkid)')
+        self.con.execute('create index if not exists urlidx on urllist(url)')
+        self.con.execute('create index if not exists wordidx on wordlist(word)')
+        self.con.execute('create index if not exists wordurlidx on wordlocation(wordid)')
+        self.con.execute('create index if not exists urltoidx on link(toid)')
+        self.con.execute('create index if not exists urlfromidx on link(fromid)')
         self.dbCommit()
 
 class searcher:
@@ -180,7 +184,8 @@ class searcher:
     def normalizeScores(self, scores, smallIsBetter=0):
         vsmall = 0.00001
         maxScore = max(scores.values())
-        maxScore = max(maxScore, vsmall)
+        if maxScore == 0:
+            maxScore = vsmall
         if smallIsBetter:
             return dict([(u, 1 - float(c) / maxScore) for u,c in scores.items()])
         else:
@@ -191,4 +196,3 @@ class searcher:
         for row in rows:
             counts[row[0]] += 1
         return self.normalizeScores(counts)
-        
