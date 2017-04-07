@@ -16,10 +16,27 @@ my_data=[['slashdot','USA','yes',18,'None'],
         ['kiwitobes','France','yes',19,'Basic']]
 
 class decisionnode:
+    def __init__(self, col=-1, value=None, result=None, tb=None, fb=None):
+        self.col = col
+        self.value = value
+        self.result = result
+        self.tb = tb
+        self.fb = fb
 
 # Divides a set on a specific column. Can handle numeric
 # or nominal values
 def divideset(rows,column,value):
+    # Make a function that tells us if a row is in
+    # the first group(true) or the second group(false)
+    split_function = None
+    if isinstance(value, int) or isinstance(value, float):
+        split_function = lambda row:row[column] >= value
+    else:
+        split_function = lambda row:row[column] == value
+
+    sett = [row for row in rows if split_function(row)]
+    setf = [row for row in rows if not split_function(row)]
+    return (sett, setf)
 
 # Create counts of possible results (the last column of 
 # each row is the result)

@@ -32,7 +32,11 @@ class crawler:
     def addToIndex(self,url,soup):
         if self.isIndexed(url):
             return
-        print 'Indexing %s' % url
+        try:
+            print 'Indexing %s' % url
+        except:
+            print 'Indexing unprintable page'
+
         urlid=self.getEntryId('urllist','url',url)
         
         text=self.getTextOnly(soup)
