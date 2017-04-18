@@ -74,7 +74,20 @@ class crawler:
 
     # Add a link between two pages
     def addLinkRef(self,urlFrom,urlTo,linkText):
-        pass
+        fromid = self.getEntryId('urllist', 'url', urlFrom)
+        toid = self.getEntryId('urllist', 'url', urlTo)
+        if fromid == toid:
+            return
+        
+        cur = self.con.execute('insert into link(fromid,toid) values(%d,%d)' % (fromid,toid))
+        linkid = cur.lastrowid
+        
+        for word in self.separateWords(linkText):
+            if word in ignoreWords:
+                continue
+            wordid = self.getEntryId('wordlist', 'word', word)
+            self.con.execute('insert into linkwords(wordid,linkid) values(%d,%d)' % (wordid,linkid))
+
 
     # Starting with a list of pages, do a breadth
     # first search to the given depth, indexing pages
@@ -164,7 +177,10 @@ class searcher:
         totalscores = dict([(row[0], 0) for row in rows])
 
         # To put the scoring functions
-        weights = [(1.0, self.frequencyScore(rows))]
+        #weights = [(1.0, self.frequencyScore(rows))]
+        weights = [(1.0, self.locationScore(rows)),
+                    (1.0, self.frequencyScore(rows))
+                    ]
 
         for weight,scores in weights:
             for urlid in totalscores:
@@ -188,10 +204,11 @@ class searcher:
     def normalizeScores(self, scores, smallIsBetter=0):
         vsmall = 0.00001
         maxScore = max(scores.values())
+        minScore = min(scores.values())
         if maxScore == 0:
             maxScore = vsmall
         if smallIsBetter:
-            return dict([(u, 1 - float(c) / maxScore) for u,c in scores.items()])
+            return dict([(u, float(minScore) / max(vsmall, c)) for u,c in scores.items()])
         else:
             return dict([(u, float(c) / maxScore) for u,c in scores.items()])
     
@@ -200,3 +217,10 @@ class searcher:
         for row in rows:
             counts[row[0]] += 1
         return self.normalizeScores(counts)
+
+    def locationScore(self, rows):
+        locations = dict([(row[0],1000000) for row in rows])
+        for row in rows:
+            loc = sum(row[1:])
+            if loc < locations[row[0]]: locations[row[0]] = loc
+        return self.normalizeScores(locations, smallIsBetter=1)
