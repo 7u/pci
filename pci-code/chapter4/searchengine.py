@@ -29,13 +29,15 @@ class crawler:
         return res[0]
 
     # Index an individual page
-    def addToIndex(self,url,soup):
+    def addToIndex(self,url,soup,depth):
         if self.isIndexed(url):
             return
-        try:
-            print 'Indexing %s' % url
-        except:
-            print 'Indexing unprintable page'
+
+        if depth == 2:
+            try:
+                print 'Indexing %s' % url
+            except:
+                print 'Indexing unprintable page'
 
         urlid=self.getEntryId('urllist','url',url)
         
@@ -106,7 +108,7 @@ class crawler:
                         print "unknown error"
                     
                 soup=BeautifulSoup(c, 'html.parser')
-                self.addToIndex(page,soup)
+                self.addToIndex(page,soup,i)
                 parsedUri=urlparse(page)
                 scheme='{uri.scheme}'.format(uri=parsedUri)
                 domain='{uri.scheme}://{uri.netloc}/'.format(uri=parsedUri)

@@ -76,6 +76,15 @@ def entropy(rows):
 
 
 def printtree(tree,indent=''):
+    if tree.results is not None:
+        print tree.results
+    else:
+        print '%d:%s?' % (tree.col, str(tree.value))
+        print '%sT->' % indent ,
+        printtree(tree.tb, indent + '  ')
+        print '%sF->' % indent ,
+        printtree(tree.fb, indent + '  ')
+
 
 
 #def getwidth(tree):
@@ -123,6 +132,7 @@ def buildtree(rows,scoref=entropy):
     if best_gain > 0:
         true_branch = buildtree(best_sets[0], scoref)
         false_branch = buildtree(best_sets[1], scoref)
-        return decisionnode(col=best_criteria[0], value=best_criteria[1], tb=true_branch, fb=false_branch)
+        return decisionnode(col=best_criteria[0], value=best_criteria[1],
+                tb=true_branch, fb=false_branch)
     else:
-        return decisionnode(results=rows)
+        return decisionnode(results=uniquecounts(rows))
