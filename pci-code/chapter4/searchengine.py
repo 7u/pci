@@ -33,7 +33,8 @@ class crawler:
         if self.isIndexed(url):
             return
 
-        if depth == 2:
+        if url == 'https://en.wikipedia.org/wiki/Functional_programming' or \
+                depth == 2:
             try:
                 print 'Indexing %s' % url
             except:
@@ -103,9 +104,9 @@ class crawler:
                     c=urllib2.urlopen(page)
                 except:
                     try:
-                        print "Could not open %s" % page
+                        print 'Could not open %s' % page
                     except:
-                        print "unknown error"
+                        print 'unknown error'
                     
                 soup=BeautifulSoup(c, 'html.parser')
                 self.addToIndex(page,soup,i)
@@ -118,8 +119,13 @@ class crawler:
                         uri=urljoin(domain,link['href'])
                         if uri.find("'")!=-1: continue
                         uri=uri.split('#')[0]
+                        if uri == 'https://en.wikipedia.org/wiki/Functional_programming':
+                            print 'Found %s' % uri 
+
                         if (scheme == 'http' or scheme == 'https') and not self.isIndexed(uri):
                             newPages.add(uri)
+                            if uri == 'https://en.wikipedia.org/wiki/Functional_programming':
+                                print 'Adding %s' % uri 
                         linkText=self.getTextOnly(link)
                         self.addLinkRef(page,uri,linkText)
                 self.dbCommit()

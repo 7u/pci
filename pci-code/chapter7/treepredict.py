@@ -99,7 +99,27 @@ def printtree(tree,indent=''):
 
 #def classify(observation,tree):
 
-#def prune(tree,mingain):
+def prune(tree,mingain):
+    if tree.tb.results == None:
+        prune(tree.tb, mingain)
+
+    if tree.fb.results == None:
+        prune(tree.fb, mingain)
+    
+    if tree.tb.results != None and tree.fb.results != None:
+        tb,fb = [],[]
+        
+        for v,c in tree.tb.results.items():
+            tb += [[v]]*c
+        for v,c in tree.fb.results.items():
+            fb_+= [[v]]*c
+
+        delta = entropy(tb+fb) - (entropy(tb) + entropy(fb)) / 2
+        if delta < mingain:
+             tree.tb = None
+             tree.fb = None
+             tree.results = uniquecounts(tb+fb)
+
 
 #def mdclassify(observation,tree):
 
