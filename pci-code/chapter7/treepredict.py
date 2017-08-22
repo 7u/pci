@@ -97,7 +97,22 @@ def printtree(tree,indent=''):
   
 #def drawnode(draw,tree,x,y):
 
-#def classify(observation,tree):
+def classify(observation,tree):
+    results = tree.results
+    if results is not None:
+        return results
+    val = tree.value
+    if isinstance(val, int) or isinstance(val, float):
+        if tree.value <= observation[tree.col]:
+            return classify(observation, tree.tb)
+        else:
+            return classify(observation, tree.fb)
+    else:
+        if tree.value == observation[tree.col]:
+            return classify(observation, tree.tb)
+        else:
+            return classify(observation, tree.fb)
+
 
 def prune(tree,mingain):
     if tree.tb.results == None:
@@ -112,7 +127,7 @@ def prune(tree,mingain):
         for v,c in tree.tb.results.items():
             tb += [[v]]*c
         for v,c in tree.fb.results.items():
-            fb_+= [[v]]*c
+            fb += [[v]]*c
 
         delta = entropy(tb+fb) - (entropy(tb) + entropy(fb)) / 2
         if delta < mingain:
