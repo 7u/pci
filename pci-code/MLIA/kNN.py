@@ -22,3 +22,17 @@ def classify0(inx, dataset, labels, k):
     sortedmatches = sorted(matches.iteritems(), key=operator.itemgetter(1), reverse=True)
     return sortedmatches[0][0]
 
+def file2matrix(filename):
+    fr = open(filename)
+    nline = len(fr.readlines())
+    returnMat = zeros((nline, 3))
+    labels = []
+
+    index = 0
+    fr = open(filename)
+    for line in fr.readlines():
+        cols = line.strip().split('\t')
+        returnMat[index,:] = cols[0:3]
+        labels.append(cols[-1])
+        index += 1
+    return returnMat, labels
